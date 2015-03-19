@@ -10,8 +10,8 @@
 
 @interface AJWValidatorRangeRule ()
 
-@property (strong, nonatomic) NSNumber *min;
-@property (strong, nonatomic) NSNumber *max;
+@property(strong, nonatomic) NSNumber *min;
+@property(strong, nonatomic) NSNumber *max;
 
 @end
 
@@ -19,8 +19,7 @@
 
 #pragma mark Init
 
-- (id)initWithType:(AJWValidatorRuleType)type invalidMessage:(NSString *)message minimum:(NSNumber *)min maximum:(NSNumber *)max
-{
+- (id)initWithType:(AJWValidatorRuleType)type invalidMessage:(NSString *)message minimum:(NSNumber *)min maximum:(NSNumber *)max {
     self = [super initWithType:type invalidMessage:message];
     if (self) {
         _min = min;
@@ -31,8 +30,7 @@
 
 #pragma mark Validate
 
-- (BOOL)isValidationRuleSatisfied:(id)instance
-{
+- (BOOL)isValidationRuleSatisfied:(id)instance {
     switch (self.type) {
         case AJWValidatorRuleTypeNumericRange: {
             float numberToValidate = [(NSNumber *)instance floatValue];
@@ -46,9 +44,7 @@
             NSString *stringToValidate = (NSString *)instance;
             return (([stringToValidate length] >= minChars) && ([stringToValidate length] <= maxChars));
         }
-        default: {
-            return NO;
-        }
+        default: { return NO; }
     }
 }
 

@@ -10,7 +10,7 @@
 
 @interface AJWValidatorEqualRule ()
 
-@property (strong, nonatomic) id otherInstance;
+@property(strong, nonatomic) id otherInstance;
 
 @end
 
@@ -18,8 +18,7 @@
 
 #pragma mark Init
 
-- (id)initWithType:(AJWValidatorRuleType)type invalidMessage:(NSString *)message otherInstance:(id)instance
-{
+- (id)initWithType:(AJWValidatorRuleType)type invalidMessage:(NSString *)message otherInstance:(id)instance {
     self = [super initWithType:type invalidMessage:message];
     if (self) {
         _otherInstance = instance;
@@ -29,8 +28,7 @@
 
 #pragma mark Validate
 
-- (BOOL)isValidationRuleSatisfied:(id)instance
-{
+- (BOOL)isValidationRuleSatisfied:(id)instance {
     return [instance isEqual:self.otherInstance];
 }
 

@@ -24,6 +24,8 @@
  */
 - (void)ajw_removeValidators;
 
+- (BOOL)isValid;
+
 #pragma mark Deprected
 
 - (void)attachValidator:(AJWValidator *)validator __attribute__((deprecated));

@@ -22,32 +22,40 @@ typedef NS_ENUM(NSUInteger, AJWValidatorInputType) {
 
 #pragma mark Associated Object Accessors
 
-- (NSMutableArray *)AJW_validators
-{
+- (NSMutableArray *)AJW_validators {
     return objc_getAssociatedObject(self, &AJWValidators);
 }
 
 #pragma mark Supported Input Views
 
-- (AJWValidatorInputType)AJW_validatorType
-{
+- (AJWValidatorInputType)AJW_validatorType {
     if ([self isKindOfClass:[UITextField class]]) {
         return AJWValidatorInputTypeUITextField;
     }
-    
+
     if ([self isKindOfClass:[UITextView class]]) {
         return AJWValidatorInputTypeUITextView;
     }
-    
+
     return AJWValidatorInputTypeUnsupported;
+}
+
+#pragma mark Validity
+
+- (BOOL)isValid {
+    BOOL b = YES;
+    for (AJWValidator *v in [self AJW_validators]) {
+        [v validate:[((id)self)text]];
+        b &= [v isValid];
+    }
+    return b;
 }
 
 #pragma mark Attach/Remove
 
-- (void)ajw_attachValidator:(AJWValidator *)validator
-{
+- (void)ajw_attachValidator:(AJWValidator *)validator {
     NSParameterAssert(validator);
-    
+
     switch ([self AJW_validatorType]) {
         case AJWValidatorInputTypeUITextField:
             [self AJW_attachTextFieldValidator];
@@ -56,47 +64,43 @@ typedef NS_ENUM(NSUInteger, AJWValidatorInputType) {
             [self AJW_attachTextViewValidator];
             break;
         case AJWValidatorInputTypeUnsupported:
-            NSLog(@"Tried to add AJWValidator to unsupported control type of class %@. %s.", [self class], __PRETTY_FUNCTION__);
+            NSLog(@"Tried to add AJWValidator to unsupported control type of class %@. " @"%s.", [self class], __PRETTY_FUNCTION__);
             NSAssert(NO, nil);
     }
-    
+
     if (![self AJW_validators]) {
         objc_setAssociatedObject(self, &AJWValidators, [NSMutableArray array], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
-    
+
     [[self AJW_validators] addObject:validator];
-    
 }
 
-- (void)ajw_removeValidators
-{
+- (void)ajw_removeValidators {
     [[self AJW_validators] removeAllObjects];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark UITextField
 
-- (void)AJW_attachTextFieldValidator
-{
+- (void)AJW_attachTextFieldValidator {
     [(UITextField *)self addTarget:self action:@selector(AJW_validateTextFieldForChange:) forControlEvents:UIControlEventEditingChanged];
 }
 
-- (void)AJW_validateTextFieldForChange:(UITextField *)textField
-{
-    [[self AJW_validators] enumerateObjectsUsingBlock:^(AJWValidator *validator, NSUInteger idx, BOOL *stop) {
-        [validator validate:textField.text];
-    }];
+- (void)AJW_validateTextFieldForChange:(UITextField *)textField {
+    [[self AJW_validators]
+        enumerateObjectsUsingBlock:^(AJWValidator *validator, NSUInteger idx, BOOL *stop) { [validator validate:textField.text]; }];
 }
 
 #pragma mark UITextView
 
-- (void)AJW_attachTextViewValidator
-{
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(AJW_validateTextViewForChange:) name:UITextViewTextDidChangeNotification object:self];
+- (void)AJW_attachTextViewValidator {
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(AJW_validateTextViewForChange:)
+                                                 name:UITextViewTextDidChangeNotification
+                                               object:self];
 }
 
-- (void)AJW_validateTextViewForChange:(NSNotification *)notification
-{
+- (void)AJW_validateTextViewForChange:(NSNotification *)notification {
     [[self AJW_validators] enumerateObjectsUsingBlock:^(AJWValidator *validator, NSUInteger idx, BOOL *stop) {
         UITextView *textView = notification.object;
         [validator validate:textView.text];
@@ -105,13 +109,11 @@ typedef NS_ENUM(NSUInteger, AJWValidatorInputType) {
 
 #pragma mark Deprecated
 
-- (void)attachValidator:(AJWValidator *)validator
-{
+- (void)attachValidator:(AJWValidator *)validator {
     [self ajw_attachValidator:validator];
 }
 
-- (void)removeValidators
-{
+- (void)removeValidators {
     [self ajw_removeValidators];
 }
 
