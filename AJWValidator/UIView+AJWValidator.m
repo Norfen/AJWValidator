@@ -51,6 +51,14 @@ typedef NS_ENUM(NSUInteger, AJWValidatorInputType) {
     return b;
 }
 
+- (NSArray *)validationErrors {
+    NSMutableArray *verrors = [[NSMutableArray alloc] init];
+    [[self AJW_validators] enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+      [verrors addObjectsFromArray:[obj errorMessages]];
+    }];
+    return verrors;
+}
+
 #pragma mark Attach/Remove
 
 - (void)ajw_attachValidator:(AJWValidator *)validator {
@@ -87,8 +95,9 @@ typedef NS_ENUM(NSUInteger, AJWValidatorInputType) {
 }
 
 - (void)AJW_validateTextFieldForChange:(UITextField *)textField {
-    [[self AJW_validators]
-        enumerateObjectsUsingBlock:^(AJWValidator *validator, NSUInteger idx, BOOL *stop) { [validator validate:textField.text]; }];
+    [[self AJW_validators] enumerateObjectsUsingBlock:^(AJWValidator *validator, NSUInteger idx, BOOL *stop) {
+      [validator validate:textField.text];
+    }];
 }
 
 #pragma mark UITextView
@@ -102,19 +111,9 @@ typedef NS_ENUM(NSUInteger, AJWValidatorInputType) {
 
 - (void)AJW_validateTextViewForChange:(NSNotification *)notification {
     [[self AJW_validators] enumerateObjectsUsingBlock:^(AJWValidator *validator, NSUInteger idx, BOOL *stop) {
-        UITextView *textView = notification.object;
-        [validator validate:textView.text];
+      UITextView *textView = notification.object;
+      [validator validate:textView.text];
     }];
-}
-
-#pragma mark Deprecated
-
-- (void)attachValidator:(AJWValidator *)validator {
-    [self ajw_attachValidator:validator];
-}
-
-- (void)removeValidators {
-    [self ajw_removeValidators];
 }
 
 @end
